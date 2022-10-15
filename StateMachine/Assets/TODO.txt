@@ -1,0 +1,1 @@
+- Add the enumeration into each state and pass on the responsibility to correctly configure said states into the state machine array via the state machine
