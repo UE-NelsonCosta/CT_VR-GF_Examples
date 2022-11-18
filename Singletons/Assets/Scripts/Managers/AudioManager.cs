@@ -4,6 +4,27 @@ using UnityEngine;
 
 public class AudioManager : Singleton<AudioManager>
 {
+    public AudioSource PlayEvent(AudioEventData audioEvent)
+    {
+        Vector3 spawnPoint = audioEvent.OverrideTransform ? audioEvent.OverrideTransform.position : audioEvent.Position;
+        Vector3 spawnRotation = audioEvent.OverrideTransform ? audioEvent.OverrideTransform.eulerAngles : audioEvent.Rotation;
+
+        GameObject audioGameObject = new GameObject(audioEvent.Clip.name);
+        AudioSource source = audioGameObject.AddComponent<AudioSource>();
+        Transform audioTransform = audioGameObject.transform;
+
+        audioTransform.position = spawnPoint;
+        audioTransform.rotation = Quaternion.Euler(spawnRotation);
+
+        if (audioEvent.ShouldParentToPoint)
+            audioTransform.parent = audioEvent.OverrideTransform;
+
+        source.clip = audioEvent.Clip;
+        source.Play();
+
+        return source;
+    }
+
     public AudioSource PlaySoundAtLocation(
         GameObject prefab, 
         Vector3 location, 
