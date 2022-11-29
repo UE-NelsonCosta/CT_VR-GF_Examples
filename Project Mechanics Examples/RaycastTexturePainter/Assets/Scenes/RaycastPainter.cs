@@ -1,64 +1,108 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RaycastPainter : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private Transform originTransform;
+
+    [SerializeField] private float rayDistance = .1f;
+    // TODO: This is hardcoded should be using a second ray to figure out how wide to draw on any texture that way you can get a pencil or a spray
+    [SerializeField] private int brushPixelRadius = 5;
+    [SerializeField] private Color brushColor = Color.red;
+    
+    [SerializeField] private bool useCamera = false;
+    [SerializeField] private bool useMouse = false; // To Disable This For VR
+
+    private void Start()
     {
-        
+        if (originTransform == null)
+        {
+            Debug.LogError($"No Origin Defined On RaycastPainter {gameObject.name}");
+            enabled = false;
+            return;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        Vector3 origin = Vector3.zero;
+        Vector3 direction = Vector3.zero;
+        GetOriginAndDirection(ref origin, ref direction);
 
-
-        float rayDistance = 100.0f;
-        Ray ray = new Ray(Camera.main.transform.position, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 100)).normalized);
+        Ray ray = new Ray(origin, direction);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, rayDistance))
         {
-            if (Input.GetKey(KeyCode.Mouse0))
-                DrawOnTexture(hit.collider.GetComponent<MeshRenderer>().material, hit.textureCoord);
+            Debug.DrawLine(ray.origin, hit.point, Color.green);
+
+            if (!Input.GetKey(KeyCode.Mouse0) && useMouse)
+            {
+                return;
+            }
+
+            PaintableSurface paintableSurface = hit.collider.GetComponent<PaintableSurface>();
+            if (paintableSurface == null || !paintableSurface.IsValid())
+            {
+                return;
+            }
+
+            DrawOnTexture(paintableSurface, hit.textureCoord);
         }
 
-        Debug.DrawLine(ray.origin, ray.origin + ray.direction * rayDistance);
+        // Debug Drawing
+        Debug.DrawLine(ray.origin, ray.origin + ray.direction * rayDistance, Color.red);
     }
 
-    private void DrawOnTexture(Material materialToWriteTo, Vector2 hitCoord)
+    private void GetOriginAndDirection(ref Vector3 origin, ref Vector3 direction)
     {
-        Texture2D materialTexture = (Texture2D)materialToWriteTo.GetTexture("_MainTex");
-        // Bad Name Or Just Simply No Assigned Texture
-        if (materialTexture == null)
+        if (useCamera)
         {
-            materialTexture = new Texture2D(128, 128);            
+            origin = Camera.main.transform.position;
+            direction = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 100)).normalized;
         }
+        else
+        {
+            origin = originTransform.position;
+            direction = originTransform.forward;
+        }
+    }
 
-        const int brushRadiusInPixels = 5;
+    private void DrawOnTexture(PaintableSurface paintableSurface, Vector2 hitCoord)
+    {
+        Texture2D materialTexture = paintableSurface.GetDrawableTexture();
 
         Vector2 hitUVToPixel = new Vector2(hitCoord.x * materialTexture.width, hitCoord.y * materialTexture.height); 
 
-        // Draw a ... 10x10 red square
-        for (int y = 0; y < brushRadiusInPixels; ++y)
+        // Draw a ... 10x10 circle, that said this isnt taking into account aspect ratios! :l
+        for (int y = 0; y < brushPixelRadius * 2; ++y)
         {
-            for (int x = 0; x < brushRadiusInPixels; ++x)
+            for (int x = 0; x < brushPixelRadius * 2; ++x)
             {
                 // Truncating works perfectly Here So Keep It
-                int XShiftedCoord = (int)hitUVToPixel.x + (x - brushRadiusInPixels / 2);
-                int YShiftedCoord = (int)hitUVToPixel.y + (y - brushRadiusInPixels / 2);
+                Vector2 shiftedPixel = new Vector2
+                    (
+                        (int)hitUVToPixel.x + (x - brushPixelRadius),
+                        (int)hitUVToPixel.y + (y - brushPixelRadius)
+                    ); 
 
-                if (IsValidIndex(XShiftedCoord, 0, materialTexture.width) && IsValidIndex(YShiftedCoord, 0, materialTexture.height))
+                // TODO: Now take the shifted pixel and check it against the aspect ratio! Otherwise this will look squashed in non 1:1 ratios
+
+
+                if (IsValidIndex((int)shiftedPixel.x, 0, materialTexture.width) && IsValidIndex((int)shiftedPixel.y, 0, materialTexture.height))
                 {
-                    materialTexture.SetPixel(XShiftedCoord, YShiftedCoord, Color.red);
+                    float distanceToPoint = Mathf.Abs(Vector2.Distance(shiftedPixel, hitUVToPixel));
+
+                    if (distanceToPoint <= brushPixelRadius)
+                    {
+                        materialTexture.SetPixel((int)shiftedPixel.x, (int)shiftedPixel.y, brushColor);
+                    }
                 }
             }
         }
 
         materialTexture.Apply();
 
-        materialToWriteTo.SetTexture("_MainTex", materialTexture);
+        paintableSurface.GetDrawableMaterial().SetTexture("_MainTex", materialTexture);
     }
 
     private bool IsValidIndex(int index, int min, int max)

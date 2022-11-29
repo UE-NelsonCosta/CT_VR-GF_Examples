@@ -225,11 +225,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 455e82a7b806e3a40a418b525bd246be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  originTransform: {fileID: 0}
+  rayDistance: 0.1
+  brushPixelRadius: 5
+  brushColor: {r: 1, g: 0, b: 0, a: 1}
+  useCamera: 0
+  useMouse: 0
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -241,6 +247,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -314,6 +321,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455e82a7b806e3a40a418b525bd246be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  originTransform: {fileID: 963194228}
+  rayDistance: 20
+  brushPixelRadius: 25
+  brushColor: {r: 1, g: 0, b: 0, a: 1}
+  useCamera: 1
+  useMouse: 1
 --- !u!1 &1753712203
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,6 +351,7 @@ GameObject:
   - component: {fileID: 1753712206}
   - component: {fileID: 1753712205}
   - component: {fileID: 1753712204}
+  - component: {fileID: 1753712208}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -412,3 +438,16 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &1753712208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753712203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12e0fac1f92a8d14e83cb93955613926, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultTextureSize: {x: 1280, y: 720}
