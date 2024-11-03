@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Light of sight component, just keeps track if it's seen an object with a specific tag, specifically the player in this example
 public class LineOfSight : MonoBehaviour
 {
     [SerializeField] private string tagObjectToFind = "";
@@ -18,20 +19,24 @@ public class LineOfSight : MonoBehaviour
 
     private void Update()
     {
+        // 45 degree angle from either side of the forward facing vector, we convert from Euler to Radians
         const float visionConeEulerAngles = 45.0f;
         float radVisionCone = visionConeEulerAngles * Mathf.Deg2Rad;
 
+        // Get the object forward then the direction to the player
         Vector3 forwardVector = transform.forward;
         Vector3 directionToPlayer = (playerTransform.position - transform.position).normalized;
 
+        // Use the dot product to see how close these two angles are aka in radians
         float dotProduct = Vector3.Dot(forwardVector, directionToPlayer);
-
         if (dotProduct < radVisionCone)
         {
             hasSeenPlayerThisFrame = false;
             return;
         }
 
+        // If the player is technically in the vision cone then let's check through physics that he is physically visible
+        // If he is we just go ahead and toggle a boolean on and save that information for later.
         Vector3 directionalMagnitudeToPlayer = (playerTransform.position - transform.position);
         float distanceToHeadset = directionalMagnitudeToPlayer.magnitude;
         Ray ray = new Ray(transform.position, directionalMagnitudeToPlayer.normalized);
@@ -50,6 +55,7 @@ public class LineOfSight : MonoBehaviour
         hasSeenPlayerThisFrame = false;
     }
 
+    // Accessor Function
     public bool HasSeenPlayerThisFrame()
     {
         return hasSeenPlayerThisFrame;

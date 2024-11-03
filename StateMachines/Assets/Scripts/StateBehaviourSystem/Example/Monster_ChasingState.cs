@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+// Example of a component needing another one, so when adding this state, it adds the required components to the list
 [RequireComponent(typeof(NavMeshAgent))]
 public class Monster_ChasingState : AStateBehaviour
 {

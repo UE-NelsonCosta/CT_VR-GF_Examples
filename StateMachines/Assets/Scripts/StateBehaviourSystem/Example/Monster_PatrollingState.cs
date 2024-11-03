@@ -1,5 +1,3 @@
- using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,9 +8,8 @@ public class Monster_PatrollingState : AStateBehaviour
 
     private NavMeshAgent agent = null;
     private LineOfSight monsterLineOfSight = null;
-
-    private float timer = 0;
-
+    
+    // Example of getting all the relevant components
     public override bool InitializeState()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -23,11 +20,7 @@ public class Monster_PatrollingState : AStateBehaviour
         return true;
     }
 
-    public override void OnStateEnd()
-    {
-        agent.isStopped = true;
-    }
-
+    // Rquest a POI and move on from there, setup the agent
     public override void OnStateStart()
     {
         if (!poiManager.IsIndexValid(lastPOIRequested))
@@ -45,10 +38,9 @@ public class Monster_PatrollingState : AStateBehaviour
         }
     }
 
+    // Keep agent moving between points unless interupted in the StateTransitionCondition
     public override void OnStateUpdate()
     {
-
-
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
             if (!poiManager.IsIndexValid(lastPOIRequested))
@@ -66,18 +58,15 @@ public class Monster_PatrollingState : AStateBehaviour
             }
         }
     }
+    // Cleanup of the state, as we should always turn off any variables we turn on in start, next state can turn them back on if it see's fit to do so
+    public override void OnStateEnd()
+    {
+        agent.isStopped = true;
+    }
 
+    // Transition out of this state if we see the player.
     public override int StateTransitionCondition()
     {
-        //         if (agent.remainingDistance <= agent.stoppingDistance)
-        //         {
-        //             return (int)EMonsterState.Idle;
-        //         }
-        if (timer < 0)
-        {
-            return (int)(EMonsterState.Idle);
-        }
-
         if (monsterLineOfSight.HasSeenPlayerThisFrame())
         {
             return (int)EMonsterState.Chasing;

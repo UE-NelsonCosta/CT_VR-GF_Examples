@@ -1,18 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.XR;
 
+// State Machine Handler, This will initialize, and run the state that needs to run at a specific time
 public class StateMachine : MonoBehaviour
 {
+    // List of state behaviours, this is an abstract class pointer, children use this tempalte to implement the correcet functions
+    // Important that the order of these is the same as the enumeration
     [SerializeField] private List<AStateBehaviour> stateBehaviours = new List<AStateBehaviour>();
 
+    // In Case you dont want the first one to be the default state, you can use this, number equivalent to the enumeration
     [SerializeField] private int defaultState = 0;
 
+    // Tracks the StateBehaviour
     private AStateBehaviour currentState = null;
 
     bool InitializeStates()
     {
+        // Initializes all the states, if it fails then this turns off till the person configuring this fixes it
         for (int i = 0; i < stateBehaviours.Count; ++i)
         {
             AStateBehaviour stateBehaviour = stateBehaviours[i];
@@ -29,6 +33,7 @@ public class StateMachine : MonoBehaviour
         return true;
     }
 
+    // Initialize The State machine As Well As Setup The Initial State
     void Start()
     {
         if (!InitializeStates())
@@ -51,6 +56,7 @@ public class StateMachine : MonoBehaviour
         }
     }
 
+    // Update The State, and check if we can transition naturally rather than forced.
     void Update()
     {
         currentState.OnStateUpdate();
@@ -64,11 +70,13 @@ public class StateMachine : MonoBehaviour
         }
     }
 
+    // Helper Function To See If States Are The Same, Unused atm
     public bool IsCurrentState(AStateBehaviour stateBehaviour)
     {
         return currentState == stateBehaviour;
     }
 
+    // Helper Function to Force A New State
     public void SetState(int index)
     {
         if (IsValidNewStateIndex(index))
@@ -79,11 +87,13 @@ public class StateMachine : MonoBehaviour
         }
     }
 
+    // Ensure Index is Valid
     private bool IsValidNewStateIndex(int stateIndex)
     {
         return stateIndex < stateBehaviours.Count && stateIndex >= 0;
     }
 
+    // Gets The Current Running State
     public AStateBehaviour GetCurrentState()
     {
         return currentState;
